@@ -102,21 +102,21 @@ struct ContentView: View {
                         .cornerRadius(12)
                     }
 
-                    Button(action: {
-                        if email.isEmpty || password.isEmpty {
-                            showAlert = true
-                        } else {
-                            print("Login success")
-                        }
-                    }) {
-                        Text("Log In")
-                            .font(.headline)
-                            .foregroundColor(Color(hex: "#2A2B2B"))
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color(hex: "#A2E6DA"))
-                            .cornerRadius(14)
-                    }
+
+                    NavigationLink(destination: HomeScreenView()) {
+                                            Text("Log In")
+                                                .font(.headline)
+                                                .foregroundColor(Color(hex: "#2A2B2B"))
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(Color(hex: "#A2E6DA"))
+                                                .cornerRadius(14)
+                                        }
+                                        .simultaneousGesture(TapGesture().onEnded {
+                                            if email.isEmpty || password.isEmpty {
+                                                showAlert = true
+                                            }
+                                        })
                     .alert(isPresented: $showAlert) {
                         Alert(
                             title: Text("Missing fields"),
