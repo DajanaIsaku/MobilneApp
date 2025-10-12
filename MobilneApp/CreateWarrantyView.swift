@@ -5,6 +5,8 @@
 //
 
 import SwiftUI
+import PhotosUI
+import UIKit
 
 struct CreateWarrantyView: View {
     @State private var name: String = ""
@@ -13,6 +15,11 @@ struct CreateWarrantyView: View {
     @State private var category: String = ""
     @State private var cost: String = ""
     @State private var selectedCurrency: Int = 0
+    
+    @State private var selectedImage: UIImage? = nil
+    @State private var isShowingImagePicker = false
+    @State private var isCameraSelected = false
+    @State private var showSourceSelection = false
     
     let borderRadius: CGFloat = 8
     let sideMargin: CGFloat = 24
@@ -28,18 +35,44 @@ struct CreateWarrantyView: View {
             VStack(spacing: 16) {
                 
                 ZStack {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.4))
-                        .frame(height: 200)
-                        .cornerRadius(borderRadius)
-                    Image(systemName: "photo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 80, height: 80)
-                        .foregroundColor(.white)
-                }
-                .padding(.horizontal, sideMargin)
-                
+                                   if let image = selectedImage {
+                                       Image(uiImage: image)
+                                           .resizable()
+                                           .scaledToFill()
+                                           .frame(height: 200)
+                                           .cornerRadius(borderRadius)
+                                           .clipped()
+                                   } else {
+                                       Rectangle()
+                                           .fill(Color.gray.opacity(0.4))
+                                           .frame(height: 200)
+                                           .cornerRadius(borderRadius)
+                                       Image(systemName: "photo")
+                                           .resizable()
+                                           .scaledToFit()
+                                           .frame(width: 80, height: 80)
+                                           .foregroundColor(.white)
+                                   }
+                               }
+                               .padding(.horizontal, sideMargin)
+                               .onTapGesture {
+                                   showSourceSelection = true
+                               }
+                               .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
+                                   Button("Camera") {
+                                       isCameraSelected = true
+                                       isShowingImagePicker = true
+                                   }
+                                   Button("Photo Library") {
+                                       isCameraSelected = false
+                                       isShowingImagePicker = true
+                                   }
+                                   Button("Cancel", role: .cancel) {}
+                               }
+                               .sheet(isPresented: $isShowingImagePicker) {
+                                   ImagePicker(selectedImage: $selectedImage)
+                               }
+
                 Divider()
                     .background(Color.white.opacity(0.16))
                     .padding(.horizontal, sideMargin)

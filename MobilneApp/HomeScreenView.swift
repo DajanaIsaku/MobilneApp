@@ -38,6 +38,17 @@ struct HomeScreenView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 50)
                     
+                    ScrollView {
+                                           VStack(spacing: 16) {
+                                               WarrantyCellView(productName: "MacBook Air", purchaseDate: "10/10/2024", warrantyPeriod: "2 years")
+                                               WarrantyCellView(productName: "iPhone 14", purchaseDate: "05/06/2023", warrantyPeriod: "1 year")
+                                               WarrantyCellView(productName: "Apple Watch", purchaseDate: "22/01/2023", warrantyPeriod: "1 year")
+                                               WarrantyCellView(productName: "Samsung TV", purchaseDate: "15/05/2022", warrantyPeriod: "3 years")
+                                               WarrantyCellView(productName: "Sony Headphones", purchaseDate: "30/09/2024", warrantyPeriod: "2 years")
+                                           }
+                                           .padding(.top, 20)
+                                       }
+                    
                     Spacer()
                     
                     HStack {
