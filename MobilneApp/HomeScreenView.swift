@@ -51,15 +51,17 @@ struct HomeScreenView: View {
                                 .font(.caption)
                         }
                         Spacer()
-                        VStack {
-                            Image(systemName: "person")
-                                .foregroundColor(.white.opacity(0.7))
-                                .font(.system(size: 24))
-                            Text("Profile")
-                                .foregroundColor(.white.opacity(0.7))
-                                .font(.caption)
-                        }
-                        Spacer()
+                        NavigationLink(destination: ProfileScreenView()) {
+                                                    VStack {
+                                                        Image(systemName: "person")
+                                                            .foregroundColor(.white.opacity(0.9))
+                                                            .font(.system(size: 24))
+                                                        Text("Profile")
+                                                            .foregroundColor(.white.opacity(0.9))
+                                                            .font(.caption)
+                                                    }
+                                                }
+                                                Spacer()
                     }
                     .padding()
                     .background(Color.black.opacity(0.25))
