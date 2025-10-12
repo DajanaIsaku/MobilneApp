@@ -8,10 +8,10 @@ import SwiftUI
 
 struct HomeScreenView: View {
     @State private var searchText = ""
-
+    
     let topColor = Color(red: 162/255, green: 230/255, blue: 218/255)
     let bottomColor = Color(red: 42/255, green: 43/255, blue: 43/255)
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -21,7 +21,7 @@ struct HomeScreenView: View {
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
-
+                
                 VStack {
                     HStack {
                         Image(systemName: "magnifyingglass")
@@ -37,9 +37,9 @@ struct HomeScreenView: View {
                     .cornerRadius(12)
                     .padding(.horizontal, 20)
                     .padding(.top, 50)
-
+                    
                     Spacer()
-
+                    
                     HStack {
                         Spacer()
                         VStack {
@@ -52,16 +52,16 @@ struct HomeScreenView: View {
                         }
                         Spacer()
                         NavigationLink(destination: ProfileScreenView()) {
-                                                    VStack {
-                                                        Image(systemName: "person")
-                                                            .foregroundColor(.white.opacity(0.9))
-                                                            .font(.system(size: 24))
-                                                        Text("Profile")
-                                                            .foregroundColor(.white.opacity(0.9))
-                                                            .font(.caption)
-                                                    }
-                                                }
-                                                Spacer()
+                            VStack {
+                                Image(systemName: "person")
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .font(.system(size: 24))
+                                Text("Profile")
+                                    .foregroundColor(.white.opacity(0.9))
+                                    .font(.caption)
+                            }
+                        }
+                        Spacer()
                     }
                     .padding()
                     .background(Color.black.opacity(0.25))
@@ -69,11 +69,33 @@ struct HomeScreenView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
                 }
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        NavigationLink(destination: CreateWarrantyView()) {
+                            VStack{
+                                Image(systemName: "plus")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 24))
+                                    .padding()
+                                    .background(Color(red: 80/255, green: 90/255, blue: 90/255))
+                                    .clipShape(Circle())
+                                    .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                            }
+                        }
+                        .padding(.trailing, 30)
+                        .padding(.bottom, 90)
+                    }
+                }
+                
             }
         }
     }
+            
 }
-
+        
 #Preview {
     HomeScreenView()
 }
+    
