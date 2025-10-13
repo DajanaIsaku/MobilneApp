@@ -35,7 +35,7 @@ struct ContentView: View {
     @State private var showAlert = false
 
     var body: some View {
-        NavigationStack { 
+        NavigationView { 
             ZStack {
                 LinearGradient(
                     gradient: Gradient(colors: [

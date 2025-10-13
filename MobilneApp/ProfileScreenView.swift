@@ -12,7 +12,7 @@ struct ProfileScreenView: View {
     let bottomColor = Color(red: 42/255, green: 43/255, blue: 43/255)
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 LinearGradient(
                     gradient: Gradient(colors: [topColor, bottomColor]),
