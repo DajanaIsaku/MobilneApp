@@ -1,16 +1,17 @@
-//  CreateWarrantyView.swift
-//  MobilneApp
+// CreateWarrantyView.swift
+// MobilneApp
 //
-//  Created by Dajana Isaku on 12. 10. 2025.
-//
+// Created by Dajana Isaku on 12. 10. 2025.
 
 import SwiftUI
-import PhotosUI
+import FirebaseFirestore
 import UIKit
 
 struct CreateWarrantyView: View {
+    @Environment(\.dismiss) var dismiss
+    
     @State private var name: String = ""
-    @State private var purchaseDate: String = ""
+    @State private var purchaseDate: Date = Date()
     @State private var warrantyLength: String = ""
     @State private var category: String = ""
     @State private var cost: String = ""
@@ -23,56 +24,56 @@ struct CreateWarrantyView: View {
     
     let borderRadius: CGFloat = 8
     let sideMargin: CGFloat = 24
-    let placeholderColor = Color.gray
     
     let topGradientColor = Color(red: 162/255, green: 230/255, blue: 218/255)
     let bottomGradientColor = Color(red: 42/255, green: 43/255, blue: 43/255)
     
     let currencies = ["USD", "EUR"]
+    let categories = ["Laptop", "Smartphone", "Smartwatch", "TV", "Headphones"]
     
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 
                 ZStack {
-                                   if let image = selectedImage {
-                                       Image(uiImage: image)
-                                           .resizable()
-                                           .scaledToFill()
-                                           .frame(height: 200)
-                                           .cornerRadius(borderRadius)
-                                           .clipped()
-                                   } else {
-                                       Rectangle()
-                                           .fill(Color.gray.opacity(0.4))
-                                           .frame(height: 200)
-                                           .cornerRadius(borderRadius)
-                                       Image(systemName: "photo")
-                                           .resizable()
-                                           .scaledToFit()
-                                           .frame(width: 80, height: 80)
-                                           .foregroundColor(.white)
-                                   }
-                               }
-                               .padding(.horizontal, sideMargin)
-                               .onTapGesture {
-                                   showSourceSelection = true
-                               }
-                               .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
-                                   Button("Camera") {
-                                       isCameraSelected = true
-                                       isShowingImagePicker = true
-                                   }
-                                   Button("Photo Library") {
-                                       isCameraSelected = false
-                                       isShowingImagePicker = true
-                                   }
-                                   Button("Cancel", role: .cancel) {}
-                               }
-                               .sheet(isPresented: $isShowingImagePicker) {
-                                   ImagePicker(selectedImage: $selectedImage)
-                               }
-
+                    if let image = selectedImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(height: 200)
+                            .cornerRadius(borderRadius)
+                            .clipped()
+                    } else {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.4))
+                            .frame(height: 200)
+                            .cornerRadius(borderRadius)
+                        Image(systemName: "photo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
+                            .foregroundColor(.white)
+                    }
+                }
+                .padding(.horizontal, sideMargin)
+                .onTapGesture {
+                    showSourceSelection = true
+                }
+                .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
+                    Button("Camera") {
+                        isCameraSelected = true
+                        isShowingImagePicker = true
+                    }
+                    Button("Photo Library") {
+                        isCameraSelected = false
+                        isShowingImagePicker = true
+                    }
+                    Button("Cancel", role: .cancel) {}
+                }
+                .sheet(isPresented: $isShowingImagePicker) {
+                    ImagePicker(selectedImage: $selectedImage)
+                }
+                
                 Divider()
                     .background(Color.white.opacity(0.16))
                     .padding(.horizontal, sideMargin)
@@ -80,73 +81,54 @@ struct CreateWarrantyView: View {
                 VStack(spacing: 12) {
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Name*")
-                            .foregroundColor(.white)
+                        Text("Name*").foregroundColor(.white)
                         TextField("Enter Name", text: $name)
                             .padding(10)
                             .background(Color.black.opacity(0.3))
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: borderRadius)
-                                    .stroke(Color.white, lineWidth: 1)
-                            )
+                            .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Purchase Date*")
-                            .foregroundColor(.white)
-                        TextField("Enter Date", text: $purchaseDate)
+                        Text("Purchase Date*").foregroundColor(.white)
+                        DatePicker("Select Date", selection: $purchaseDate, displayedComponents: .date)
+                            .datePickerStyle(CompactDatePickerStyle())
                             .padding(10)
                             .background(Color.black.opacity(0.3))
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: borderRadius)
-                                    .stroke(Color.white, lineWidth: 1)
-                            )
+                            .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Warranty Length*")
-                            .foregroundColor(.white)
-                        TextField("Enter Length (months)", text: $warrantyLength)
+                        Text("Warranty Length (months)*").foregroundColor(.white)
+                        TextField("Enter Length", text: $warrantyLength)
+                            .keyboardType(.numberPad)
                             .padding(10)
                             .background(Color.black.opacity(0.3))
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: borderRadius)
-                                    .stroke(Color.white, lineWidth: 1)
-                            )
+                            .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Category*")
-                            .foregroundColor(.white)
-                        Button(action: {
-                            print("Select category tapped")
-                        }) {
-                            HStack {
-                                Text(category.isEmpty ? "Select category" : category)
-                                    .foregroundColor(category.isEmpty ? placeholderColor : .white)
-                                Spacer()
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(.white)
+                        Text("Category*").foregroundColor(.white)
+                        Picker("Select Category", selection: $category) {
+                            ForEach(categories, id: \.self) { cat in
+                                Text(cat).tag(cat)
                             }
-                            .padding(10)
-                            .background(Color.black.opacity(0.3))
-                            .cornerRadius(borderRadius)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: borderRadius)
-                                    .stroke(Color.white, lineWidth: 1)
-                            )
                         }
+                        .pickerStyle(MenuPickerStyle())
+                        .padding(10)
+                        .background(Color.black.opacity(0.3))
+                        .foregroundColor(.white)
+                        .cornerRadius(borderRadius)
+                        .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Cost*")
-                            .foregroundColor(.white)
+                        Text("Cost*").foregroundColor(.white)
                         HStack {
                             TextField("Enter cost", text: $cost)
                                 .keyboardType(.decimalPad)
@@ -154,10 +136,7 @@ struct CreateWarrantyView: View {
                                 .background(Color.black.opacity(0.3))
                                 .foregroundColor(.white)
                                 .cornerRadius(borderRadius)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: borderRadius)
-                                        .stroke(Color.white, lineWidth: 1)
-                                )
+                                .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
                             Picker("", selection: $selectedCurrency) {
                                 ForEach(0..<currencies.count, id: \.self) { index in
                                     Text(currencies[index]).tag(index)
@@ -167,32 +146,24 @@ struct CreateWarrantyView: View {
                             .frame(width: 100)
                         }
                     }
-                    
-                    Text("All fields are required")
-                        .foregroundColor(.red)
-                        .opacity(0)
                 }
                 .padding(.horizontal, sideMargin)
                 
                 HStack(spacing: 16) {
-                    Button(action: {
-                        print("Save tapped")
-                    }) {
+                    Button(action: saveWarranty) {
                         Text("Save")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.gray.opacity(0.6))
+                            .background(Color.green.opacity(0.8))
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
                     }
                     
-                    Button(action: {
-                        print("Discard tapped")
-                    }) {
+                    Button(action: discardForm) {
                         Text("Discard")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.gray.opacity(0.6))
+                            .background(Color.red.opacity(0.8))
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
                     }
@@ -213,6 +184,48 @@ struct CreateWarrantyView: View {
         )
         .navigationTitle("Create Warranty")
         .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    private func saveWarranty() {
+        guard !name.isEmpty,
+              !warrantyLength.isEmpty,
+              !category.isEmpty,
+              !cost.isEmpty else {
+            print("Please fill all fields")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        let dateString = formatter.string(from: purchaseDate)
+        
+        let warrantyData: [String: Any] = [
+            "productName": name,
+            "purchaseDate": dateString,
+            "warrantyPeriod": warrantyLength + " months",
+            "category": category,
+            "cost": cost + " " + currencies[selectedCurrency],
+            "timestamp": Timestamp()
+        ]
+        
+        db.collection("warranties").addDocument(data: warrantyData) { error in
+            if let error = error {
+                print("Error saving warranty: \(error.localizedDescription)")
+            } else {
+                print("Warranty saved successfully")
+                dismiss()
+            }
+        }
+    }
+    
+    private func discardForm() {
+        name = ""
+        warrantyLength = ""
+        category = ""
+        cost = ""
+        selectedCurrency = 0
+        selectedImage = nil
     }
 }
 
