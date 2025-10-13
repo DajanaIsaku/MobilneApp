@@ -5,6 +5,8 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+
 
 struct RegistrationView: View {
     @State private var email = ""
@@ -117,9 +119,18 @@ struct RegistrationView: View {
                         alertMessage = "Passwords do not match."
                         showAlert = true
                     } else {
-                        print("Signup success")
+                        Auth.auth().createUser(withEmail: email, password: password) { result, error in
+                            if let error = error {
+                                alertMessage = "Registration failed: \(error.localizedDescription)"
+                                showAlert = true
+                            } else {
+                                alertMessage = "Account created successfully!"
+                                showAlert = true
+                            }
+                        }
                     }
-                }) {
+                })
+ {
                     Text("Sign Up")
                         .font(.headline)
                         .foregroundColor(Color(hex: "#2A2B2B"))
