@@ -169,27 +169,35 @@ struct HomeScreenView: View {
     }
     
     private func fetchWarranties() {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("No logged-in user")
+            return
+        }
+
         let db = Firestore.firestore()
-        db.collection("warranties").getDocuments { snapshot, error in
-            if let error = error {
-                print("Error fetching warranties: \(error)")
-                return
-            }
-            if let documents = snapshot?.documents {
-                self.warranties = documents.map { doc in
-                    let data = doc.data()
-                    return WarrantyItem(
-                        id: doc.documentID,
-                        productName: data["productName"] as? String ?? "",
-                        purchaseDate: data["purchaseDate"] as? String ?? "",
-                        warrantyPeriod: data["warrantyPeriod"] as? String ?? "",
-                        category: data["category"] as? String ?? "",
-                        cost: data["cost"] as? String ?? ""
-                    )
+        db.collection("warranties")
+            .whereField("userId", isEqualTo: userId) 
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error fetching warranties: \(error)")
+                    return
+                }
+                if let documents = snapshot?.documents {
+                    self.warranties = documents.map { doc in
+                        let data = doc.data()
+                        return WarrantyItem(
+                            id: doc.documentID,
+                            productName: data["productName"] as? String ?? "",
+                            purchaseDate: data["purchaseDate"] as? String ?? "",
+                            warrantyPeriod: data["warrantyPeriod"] as? String ?? "",
+                            category: data["category"] as? String ?? "",
+                            cost: data["cost"] as? String ?? ""
+                        )
+                    }
                 }
             }
-        }
     }
+
 }
 
 #Preview {

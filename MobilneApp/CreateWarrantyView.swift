@@ -6,6 +6,8 @@
 import SwiftUI
 import FirebaseFirestore
 import UIKit
+import FirebaseAuth
+
 
 struct CreateWarrantyView: View {
     @Environment(\.dismiss) var dismiss
@@ -194,13 +196,19 @@ struct CreateWarrantyView: View {
             print("Please fill all fields")
             return
         }
-        
+
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("User not logged in")
+            return
+        }
+
         let db = Firestore.firestore()
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
         let dateString = formatter.string(from: purchaseDate)
-        
+
         let warrantyData: [String: Any] = [
+            "userId": userId,
             "productName": name,
             "purchaseDate": dateString,
             "warrantyPeriod": warrantyLength + " months",
@@ -208,7 +216,7 @@ struct CreateWarrantyView: View {
             "cost": cost + " " + currencies[selectedCurrency],
             "timestamp": Timestamp()
         ]
-        
+
         db.collection("warranties").addDocument(data: warrantyData) { error in
             if let error = error {
                 print("Error saving warranty: \(error.localizedDescription)")
@@ -218,6 +226,7 @@ struct CreateWarrantyView: View {
             }
         }
     }
+
     
     private func discardForm() {
         name = ""
