@@ -8,10 +8,12 @@ import FirebaseAuth
 import FirebaseFirestore
 
 struct WarrantyItem: Identifiable {
-    let id = UUID()
+    var id: String = UUID().uuidString
     let productName: String
     let purchaseDate: String
     let warrantyPeriod: String
+    let category: String
+    let cost: String
 }
 
 struct HomeScreenView: View {
@@ -57,10 +59,10 @@ struct HomeScreenView: View {
                     
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.white)
                         TextField("Search...", text: $searchText)
                             .padding(8)
-                            .background(Color.white.opacity(0.2))
+                            .background(Color.white.opacity(0.7))
                             .cornerRadius(10)
                             .foregroundColor(.white)
                     }
@@ -86,11 +88,14 @@ struct HomeScreenView: View {
                                 .padding(.top, 50)
                             } else {
                                 ForEach(filteredWarranties) { warranty in
-                                    WarrantyCellView(
-                                        productName: warranty.productName,
-                                        purchaseDate: warranty.purchaseDate,
-                                        warrantyPeriod: warranty.warrantyPeriod
-                                    )
+                                    NavigationLink(destination: EditWarrantyView(warranty: warranty)) {
+                                        WarrantyCellView(
+                                            productName: warranty.productName,
+                                            purchaseDate: warranty.purchaseDate,
+                                            warrantyPeriod: warranty.warrantyPeriod,
+                                            category: warranty.category
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -174,9 +179,12 @@ struct HomeScreenView: View {
                 self.warranties = documents.map { doc in
                     let data = doc.data()
                     return WarrantyItem(
+                        id: doc.documentID,
                         productName: data["productName"] as? String ?? "",
                         purchaseDate: data["purchaseDate"] as? String ?? "",
-                        warrantyPeriod: data["warrantyPeriod"] as? String ?? ""
+                        warrantyPeriod: data["warrantyPeriod"] as? String ?? "",
+                        category: data["category"] as? String ?? "",
+                        cost: data["cost"] as? String ?? ""
                     )
                 }
             }

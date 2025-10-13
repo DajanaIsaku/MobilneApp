@@ -11,14 +11,34 @@ struct WarrantyCellView: View {
     var productName: String
     var purchaseDate: String
     var warrantyPeriod: String
+    var category: String
+
+    private func iconName(for category: String) -> String {
+        switch category.lowercased() {
+        case "laptop":
+            return "laptopcomputer"
+        case "smartphone":
+            return "iphone"
+        case "smartwatch":
+            return "applewatch"
+        case "tv":
+            return "tv"
+        case "headphones":
+            return "headphones"
+        default:
+            return "doc.text.fill"
+        }
+    }
+
+
 
     var body: some View {
         HStack(spacing: 16) {
-            Image(systemName: "doc.text.fill")
+            Image(systemName: iconName(for: category))
                 .resizable()
                 .scaledToFit()
                 .frame(width: 40, height: 40)
-                .foregroundColor(Color.gray.opacity(0.9))
+                .foregroundColor(.white)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(productName)
@@ -27,11 +47,11 @@ struct WarrantyCellView: View {
 
                 Text("Purchased: \(purchaseDate)")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
-
+                    .foregroundColor(.white)
+                
                 Text("Warranty: \(warrantyPeriod)")
                     .font(.footnote)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.white)
             }
 
             Spacer()
@@ -56,10 +76,7 @@ struct WarrantyCellView: View {
         )
         .ignoresSafeArea()
 
-        VStack {
-            WarrantyCellView(productName: "MacBook Air", purchaseDate: "10/10/2024", warrantyPeriod: "2 years")
-            WarrantyCellView(productName: "iPhone 14", purchaseDate: "05/06/2023", warrantyPeriod: "1 year")
-        }
+       
     }
 }
 

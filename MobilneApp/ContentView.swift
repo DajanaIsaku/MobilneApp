@@ -44,7 +44,6 @@ struct ContentView: View {
     }
 }
 
-// MARK: - LOGIN VIEW
 struct LoginView: View {
     @State private var email = ""
     @State private var password = ""
