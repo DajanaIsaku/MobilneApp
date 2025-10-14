@@ -18,7 +18,7 @@ struct EditWarrantyView: View {
     @State private var warrantyLength: String
     @State private var category: String
     @State private var cost: String
-    @State private var locationName: String
+    //@State private var purchaseLocation: String
     @State private var selectedCurrency: Int = 0
     @State private var selectedImage: UIImage? = nil
     @State private var isShowingImagePicker = false
@@ -51,14 +51,13 @@ struct EditWarrantyView: View {
             _cost = State(initialValue: warranty.cost)
         }
 
-        _locationName = State(initialValue: warranty.locationName)
+        //_purchaseLocation = State(initialValue: warranty.purchaseLocation)
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
 
-                // MARK: - IMAGE SECTION
                 ZStack {
                     if let image = selectedImage {
                         Image(uiImage: image)
@@ -95,28 +94,29 @@ struct EditWarrantyView: View {
                     .background(Color.white.opacity(0.16))
                     .padding(.horizontal, sideMargin)
 
-                // MARK: - INPUT FIELDS
                 VStack(spacing: 12) {
                     CustomInputField(title: "Name*", text: $name)
-                    DateInputField(title: "Purchase Date*", date: $purchaseDate)
-                    CustomInputField(title: "Warranty Length (months)*", text: $warrantyLength, keyboardType: .numberPad)
+                    VStack(alignment: .leading, spacing: 4) {
+                                            Text("Purchase Date*").foregroundColor(.white)
+                                            Text(purchaseDateFormatted)
+                                                .padding(10)
+                                                .frame(maxWidth: .infinity)
+                                                .background(Color.black.opacity(0.3))
+                                                .foregroundColor(.white)
+                                                .cornerRadius(borderRadius)
+                                                .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
+                    };                    CustomInputField(title: "Warranty Length (months)*", text: $warrantyLength, keyboardType: .numberPad)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Category*").foregroundColor(.white)
-                        Picker("Select Category", selection: $category) {
-                            ForEach(categories, id: \.self) { cat in
-                                Text(cat).tag(cat)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        .padding(10)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.black.opacity(0.3))
-                        .foregroundColor(.white)
-                        .cornerRadius(borderRadius)
-                        .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
-                    }
-
+                                           Text("Category*").foregroundColor(.white)
+                                           Text(category)
+                                               .padding(10)
+                                               .frame(maxWidth: .infinity)
+                                               .background(Color.black.opacity(0.3))
+                                               .foregroundColor(.white)
+                                               .cornerRadius(borderRadius)
+                                               .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
+                                       }
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Cost*").foregroundColor(.white)
                         HStack {
@@ -138,12 +138,10 @@ struct EditWarrantyView: View {
                         }
                     }
 
-                    // MARK: - LOCATION FIELD
-                    CustomInputField(title: "Location*", text: $locationName)
+                    //CustomInputField(title: "Location*", text: $purchaseLocation)
                 }
                 .padding(.horizontal, sideMargin)
 
-                // MARK: - ACTION BUTTONS
                 HStack(spacing: 16) {
                     Button(action: updateWarranty) {
                         Text("Save")
@@ -194,7 +192,6 @@ struct EditWarrantyView: View {
         }
     }
 
-    // MARK: - UPDATE WARRANTY
     private func updateWarranty() {
         guard !name.isEmpty, !warrantyLength.isEmpty, !category.isEmpty, !cost.isEmpty else {
             print("Please fill all fields")
@@ -212,8 +209,8 @@ struct EditWarrantyView: View {
             "warrantyPeriod": warrantyLength + " months",
             "category": category,
             "cost": cost + " " + currencies[selectedCurrency],
-            "timestamp": Timestamp(),
-            "location": locationName
+            "timestamp": Timestamp()
+            //"purchaseLocation.name": purchaseLocation
         ]
 
         if let image = selectedImage,
@@ -250,9 +247,14 @@ struct EditWarrantyView: View {
     private func getDocumentsDirectory() -> URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
+    
+    private var purchaseDateFormatted: String {
+            let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy."
+            return formatter.string(from: purchaseDate)
+        }
 }
 
-// MARK: - CUSTOM INPUT FIELD COMPONENTS
 
 struct CustomInputField: View {
     var title: String

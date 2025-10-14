@@ -15,7 +15,7 @@ struct WarrantyItem: Identifiable {
     let category: String
     let cost: String
     var localImagePath: String? = nil
-    var locationName: String
+    var purchaseLocation: String
 
     
 }
@@ -198,7 +198,7 @@ struct HomeScreenView: View {
                             warrantyPeriod: data["warrantyPeriod"] as? String ?? "",
                             category: data["category"] as? String ?? "",
                             cost: data["cost"] as? String ?? "",
-                            locationName: data["locationName"] as? String ?? ""
+                            purchaseLocation: data["purchaseLocation.name"] as? String ?? ""
                         )
                     }
                 }
@@ -209,4 +209,9 @@ struct HomeScreenView: View {
 
 #Preview {
     HomeScreenView()
+}
+struct LocationData: Codable {
+    var latitude: Double
+    var longitude: Double
+    var name: String
 }
