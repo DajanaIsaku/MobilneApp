@@ -12,6 +12,7 @@ struct WarrantyCellView: View {
     var purchaseDate: String
     var warrantyPeriod: String
     var category: String
+    let localImagePath: String?
 
     private func iconName(for category: String) -> String {
         switch category.lowercased() {

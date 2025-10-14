@@ -14,6 +14,9 @@ struct WarrantyItem: Identifiable {
     let warrantyPeriod: String
     let category: String
     let cost: String
+    var localImagePath: String? = nil
+    
+    
 }
 
 struct HomeScreenView: View {
@@ -93,7 +96,8 @@ struct HomeScreenView: View {
                                             productName: warranty.productName,
                                             purchaseDate: warranty.purchaseDate,
                                             warrantyPeriod: warranty.warrantyPeriod,
-                                            category: warranty.category
+                                            category: warranty.category,
+                                            localImagePath: warranty.localImagePath
                                         )
                                     }
                                 }

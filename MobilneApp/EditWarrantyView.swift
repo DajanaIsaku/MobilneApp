@@ -2,7 +2,7 @@
 //  EditWarrantyView.swift
 //  MobilneApp
 //
-//  Created by Dajana Isaku on 13. 10. 2025..
+//  Created by Dajana Isaku on 13. 10. 2025.
 //
 
 import SwiftUI
@@ -89,6 +89,9 @@ struct EditWarrantyView: View {
                 }
                 .sheet(isPresented: $isShowingImagePicker) {
                     ImagePicker(selectedImage: $selectedImage)
+                }
+                .onAppear {
+                    loadWarrantyImage()
                 }
                 
                 Divider()
@@ -202,6 +205,34 @@ struct EditWarrantyView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
     
+    // MARK: - Image Loader
+    private func loadWarrantyImage() {
+        guard selectedImage == nil, let localPath = warranty.localImagePath else { return }
+        
+        let fileURL = getDocumentsDirectory().appendingPathComponent(localPath)
+        if FileManager.default.fileExists(atPath: fileURL.path),
+           let data = try? Data(contentsOf: fileURL),
+           let image = UIImage(data: data) {
+            selectedImage = image
+            return
+        }
+        
+        if let url = URL(string: localPath) {
+            DispatchQueue.global(qos: .background).async {
+                if let data = try? Data(contentsOf: url),
+                   let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.selectedImage = image
+                    }
+                } else {
+                    print("Could not load image from URL: \(url)")
+                }
+            }
+        } else {
+            print("Local image not found at path: \(localPath)")
+        }
+    }
+    
     private func updateWarranty() {
         guard !name.isEmpty,
               !warrantyLength.isEmpty,
@@ -216,7 +247,7 @@ struct EditWarrantyView: View {
         formatter.dateFormat = "dd/MM/yyyy"
         let dateString = formatter.string(from: purchaseDate)
         
-        let updatedData: [String: Any] = [
+        var updatedData: [String: Any] = [
             "productName": name,
             "purchaseDate": dateString,
             "warrantyPeriod": warrantyLength + " months",
@@ -224,6 +255,14 @@ struct EditWarrantyView: View {
             "cost": cost + " " + currencies[selectedCurrency],
             "timestamp": Timestamp()
         ]
+        
+        if let image = selectedImage,
+           let data = image.jpegData(compressionQuality: 0.7) {
+            let filename = "\(UUID().uuidString).jpg"
+            let fileURL = getDocumentsDirectory().appendingPathComponent(filename)
+            try? data.write(to: fileURL)
+            updatedData["localImagePath"] = filename
+        }
         
         db.collection("warranties").document(warranty.id).updateData(updatedData) { error in
             if let error = error {
@@ -245,5 +284,9 @@ struct EditWarrantyView: View {
                 dismiss()
             }
         }
+    }
+    
+    private func getDocumentsDirectory() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 }

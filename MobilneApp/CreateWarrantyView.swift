@@ -1,13 +1,7 @@
-// CreateWarrantyView.swift
-// MobilneApp
-//
-// Created by Dajana Isaku on 12. 10. 2025.
-
 import SwiftUI
 import FirebaseFirestore
-import UIKit
 import FirebaseAuth
-
+import UIKit
 
 struct CreateWarrantyView: View {
     @Environment(\.dismiss) var dismiss
@@ -23,6 +17,7 @@ struct CreateWarrantyView: View {
     @State private var isShowingImagePicker = false
     @State private var isCameraSelected = false
     @State private var showSourceSelection = false
+    @State private var isSaving = false
     
     let borderRadius: CGFloat = 8
     let sideMargin: CGFloat = 24
@@ -81,16 +76,7 @@ struct CreateWarrantyView: View {
                     .padding(.horizontal, sideMargin)
                 
                 VStack(spacing: 12) {
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Name*").foregroundColor(.white)
-                        TextField("Enter Name", text: $name)
-                            .padding(10)
-                            .background(Color.black.opacity(0.3))
-                            .foregroundColor(.white)
-                            .cornerRadius(borderRadius)
-                            .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
-                    }
+                    inputField(title: "Name*", text: $name, placeholder: "Enter Name")
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Purchase Date*").foregroundColor(.white)
@@ -103,16 +89,7 @@ struct CreateWarrantyView: View {
                             .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
                     }
                     
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Warranty Length (months)*").foregroundColor(.white)
-                        TextField("Enter Length", text: $warrantyLength)
-                            .keyboardType(.numberPad)
-                            .padding(10)
-                            .background(Color.black.opacity(0.3))
-                            .foregroundColor(.white)
-                            .cornerRadius(borderRadius)
-                            .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
-                    }
+                    inputField(title: "Warranty Length (months)*", text: $warrantyLength, placeholder: "Enter Length", isNumber: true)
                     
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Category*").foregroundColor(.white)
@@ -139,6 +116,7 @@ struct CreateWarrantyView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(borderRadius)
                                 .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
+                            
                             Picker("", selection: $selectedCurrency) {
                                 ForEach(0..<currencies.count, id: \.self) { index in
                                     Text(currencies[index]).tag(index)
@@ -151,6 +129,12 @@ struct CreateWarrantyView: View {
                 }
                 .padding(.horizontal, sideMargin)
                 
+                if isSaving {
+                    ProgressView("Saving...")
+                        .foregroundColor(.white)
+                        .padding()
+                }
+                
                 HStack(spacing: 16) {
                     Button(action: saveWarranty) {
                         Text("Save")
@@ -160,6 +144,7 @@ struct CreateWarrantyView: View {
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
                     }
+                    .disabled(isSaving)
                     
                     Button(action: discardForm) {
                         Text("Discard")
@@ -172,7 +157,6 @@ struct CreateWarrantyView: View {
                 }
                 .padding(.horizontal, sideMargin)
                 .padding(.bottom, 30)
-                
             }
             .padding(.top, 20)
         }
@@ -189,25 +173,36 @@ struct CreateWarrantyView: View {
     }
     
     private func saveWarranty() {
-        guard !name.isEmpty,
-              !warrantyLength.isEmpty,
-              !category.isEmpty,
-              !cost.isEmpty else {
+        guard !name.isEmpty, !warrantyLength.isEmpty, !category.isEmpty, !cost.isEmpty else {
             print("Please fill all fields")
             return
         }
-
         guard let userId = Auth.auth().currentUser?.uid else {
             print("User not logged in")
             return
         }
-
+        
+        isSaving = true
+        
+        var localImagePath: String? = nil
+        if let image = selectedImage, let data = image.jpegData(compressionQuality: 0.7) {
+            let filename = UUID().uuidString + ".jpg"
+            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+            do {
+                try data.write(to: url)
+                localImagePath = filename
+                print("Image saved locally at \(url)")
+            } catch {
+                print("Failed to save image: \(error.localizedDescription)")
+            }
+        }
+        
         let db = Firestore.firestore()
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
         let dateString = formatter.string(from: purchaseDate)
-
-        let warrantyData: [String: Any] = [
+        
+        var warrantyData: [String: Any] = [
             "userId": userId,
             "productName": name,
             "purchaseDate": dateString,
@@ -216,17 +211,34 @@ struct CreateWarrantyView: View {
             "cost": cost + " " + currencies[selectedCurrency],
             "timestamp": Timestamp()
         ]
-
+        
+        if let localPath = localImagePath {
+            warrantyData["localImagePath"] = localPath
+        }
+        
         db.collection("warranties").addDocument(data: warrantyData) { error in
+            isSaving = false
             if let error = error {
                 print("Error saving warranty: \(error.localizedDescription)")
             } else {
-                print("Warranty saved successfully")
+                print("Warranty saved successfully!")
                 dismiss()
             }
         }
     }
-
+    
+    private func inputField(title: String, text: Binding<String>, placeholder: String, isNumber: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).foregroundColor(.white)
+            TextField(placeholder, text: text)
+                .keyboardType(isNumber ? .numberPad : .default)
+                .padding(10)
+                .background(Color.black.opacity(0.3))
+                .foregroundColor(.white)
+                .cornerRadius(borderRadius)
+                .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
+        }
+    }
     
     private func discardForm() {
         name = ""
