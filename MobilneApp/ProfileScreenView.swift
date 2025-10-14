@@ -72,11 +72,7 @@ struct ProfileScreenView: View {
                         .foregroundColor(Color.white)
                         .padding(.bottom, 30)
 
-                    Text("My Warranties")
-                        .font(.largeTitle.bold())
-                        .foregroundColor(.white)
-                        .padding(.bottom, 100)
-
+                    
                     Spacer()
 
                     HStack {

@@ -2,6 +2,8 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 import UIKit
+import CoreLocation
+import MapKit
 
 struct CreateWarrantyView: View {
     @Environment(\.dismiss) var dismiss
@@ -18,6 +20,10 @@ struct CreateWarrantyView: View {
     @State private var isCameraSelected = false
     @State private var showSourceSelection = false
     @State private var isSaving = false
+    
+    @State private var showMapPicker = false
+    @State private var selectedCoordinate: CLLocationCoordinate2D? = nil
+    @State private var locationName: String = ""
     
     let borderRadius: CGFloat = 8
     let sideMargin: CGFloat = 24
@@ -53,9 +59,7 @@ struct CreateWarrantyView: View {
                     }
                 }
                 .padding(.horizontal, sideMargin)
-                .onTapGesture {
-                    showSourceSelection = true
-                }
+                .onTapGesture { showSourceSelection = true }
                 .confirmationDialog("Select Source", isPresented: $showSourceSelection) {
                     Button("Camera") {
                         isCameraSelected = true
@@ -83,6 +87,7 @@ struct CreateWarrantyView: View {
                         DatePicker("Select Date", selection: $purchaseDate, displayedComponents: .date)
                             .datePickerStyle(CompactDatePickerStyle())
                             .padding(10)
+                            .frame(maxWidth: .infinity)
                             .background(Color.black.opacity(0.3))
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
@@ -100,6 +105,7 @@ struct CreateWarrantyView: View {
                         }
                         .pickerStyle(MenuPickerStyle())
                         .padding(10)
+                        .frame(maxWidth: .infinity)
                         .background(Color.black.opacity(0.3))
                         .foregroundColor(.white)
                         .cornerRadius(borderRadius)
@@ -126,6 +132,29 @@ struct CreateWarrantyView: View {
                             .frame(width: 100)
                         }
                     }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Purchase Location").foregroundColor(.white)
+                        
+                        Button(action: { showMapPicker = true }) {
+                            Text("Select on Map")
+                                .frame(maxWidth: .infinity)
+                                .padding(10)
+                                .background(Color.gray.opacity(0.7))
+                                .foregroundColor(.white)
+                                .cornerRadius(borderRadius)
+                        }
+                        
+                        if !locationName.isEmpty {
+                            Text("Selected: \(locationName)")
+                                .foregroundColor(.white)
+                                .font(.subheadline)
+                                .padding(.top, 4)
+                        }
+                    }
+                    .sheet(isPresented: $showMapPicker) {
+                        MapPickerView(selectedCoordinate: $selectedCoordinate, locationName: $locationName)
+                    }
                 }
                 .padding(.horizontal, sideMargin)
                 
@@ -140,20 +169,13 @@ struct CreateWarrantyView: View {
                         Text("Save")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.green.opacity(0.8))
+                            .background(Color.gray.opacity(0.7))
                             .foregroundColor(.white)
                             .cornerRadius(borderRadius)
                     }
                     .disabled(isSaving)
                     
-                    Button(action: discardForm) {
-                        Text("Discard")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(borderRadius)
-                    }
+                    
                 }
                 .padding(.horizontal, sideMargin)
                 .padding(.bottom, 30)
@@ -170,6 +192,31 @@ struct CreateWarrantyView: View {
         )
         .navigationTitle("Create Warranty")
         .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    private func inputField(title: String, text: Binding<String>, placeholder: String, isNumber: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).foregroundColor(.white)
+            TextField(placeholder, text: text)
+                .keyboardType(isNumber ? .numberPad : .default)
+                .padding(10)
+                .frame(maxWidth: .infinity)
+                .background(Color.black.opacity(0.3))
+                .foregroundColor(.white)
+                .cornerRadius(borderRadius)
+                .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
+        }
+    }
+    
+    private func discardForm() {
+        name = ""
+        warrantyLength = ""
+        category = ""
+        cost = ""
+        selectedCurrency = 0
+        selectedImage = nil
+        selectedCoordinate = nil
+        locationName = ""
     }
     
     private func saveWarranty() {
@@ -191,7 +238,6 @@ struct CreateWarrantyView: View {
             do {
                 try data.write(to: url)
                 localImagePath = filename
-                print("Image saved locally at \(url)")
             } catch {
                 print("Failed to save image: \(error.localizedDescription)")
             }
@@ -215,6 +261,13 @@ struct CreateWarrantyView: View {
         if let localPath = localImagePath {
             warrantyData["localImagePath"] = localPath
         }
+        if let coord = selectedCoordinate {
+            warrantyData["purchaseLocation"] = [
+                "latitude": coord.latitude,
+                "longitude": coord.longitude,
+                "name": locationName
+            ]
+        }
         
         db.collection("warranties").addDocument(data: warrantyData) { error in
             isSaving = false
@@ -226,30 +279,4 @@ struct CreateWarrantyView: View {
             }
         }
     }
-    
-    private func inputField(title: String, text: Binding<String>, placeholder: String, isNumber: Bool = false) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).foregroundColor(.white)
-            TextField(placeholder, text: text)
-                .keyboardType(isNumber ? .numberPad : .default)
-                .padding(10)
-                .background(Color.black.opacity(0.3))
-                .foregroundColor(.white)
-                .cornerRadius(borderRadius)
-                .overlay(RoundedRectangle(cornerRadius: borderRadius).stroke(Color.white, lineWidth: 1))
-        }
-    }
-    
-    private func discardForm() {
-        name = ""
-        warrantyLength = ""
-        category = ""
-        cost = ""
-        selectedCurrency = 0
-        selectedImage = nil
-    }
-}
-
-#Preview {
-    CreateWarrantyView()
 }
