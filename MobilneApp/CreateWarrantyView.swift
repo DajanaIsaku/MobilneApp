@@ -25,6 +25,9 @@ struct CreateWarrantyView: View {
     @State private var selectedCoordinate: CLLocationCoordinate2D? = nil
     @State private var locationName: String = ""
     
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
     let borderRadius: CGFloat = 8
     let sideMargin: CGFloat = 24
     
@@ -174,8 +177,6 @@ struct CreateWarrantyView: View {
                             .cornerRadius(borderRadius)
                     }
                     .disabled(isSaving)
-                    
-                    
                 }
                 .padding(.horizontal, sideMargin)
                 .padding(.bottom, 30)
@@ -192,6 +193,9 @@ struct CreateWarrantyView: View {
         )
         .navigationTitle("Create Warranty")
         .navigationBarTitleDisplayMode(.inline)
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("Invalid Input"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+        }
     }
     
     private func inputField(title: String, text: Binding<String>, placeholder: String, isNumber: Bool = false) -> some View {
@@ -208,22 +212,36 @@ struct CreateWarrantyView: View {
         }
     }
     
-    private func discardForm() {
-        name = ""
-        warrantyLength = ""
-        category = ""
-        cost = ""
-        selectedCurrency = 0
-        selectedImage = nil
-        selectedCoordinate = nil
-        locationName = ""
+    private func validateFields() -> Bool {
+        guard !name.isEmpty, !warrantyLength.isEmpty, !category.isEmpty, !cost.isEmpty else {
+            alertMessage = "Please fill in all required fields."
+            return false
+        }
+        
+        guard selectedImage != nil else {
+            alertMessage = "Please add a product image."
+            return false
+        }
+        
+        if purchaseDate > Date() {
+            alertMessage = "Purchase date cannot be in the future."
+            return false
+        }
+        
+        if Double(cost) == nil || (Double(cost) ?? 0) <= 0 {
+            alertMessage = "Cost must be a positive number."
+            return false
+        }
+        
+        return true
     }
     
     private func saveWarranty() {
-        guard !name.isEmpty, !warrantyLength.isEmpty, !category.isEmpty, !cost.isEmpty else {
-            print("Please fill all fields")
+        guard validateFields() else {
+            showAlert = true
             return
         }
+        
         guard let userId = Auth.auth().currentUser?.uid else {
             print("User not logged in")
             return
