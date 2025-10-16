@@ -88,6 +88,7 @@ struct ProfileScreenView: View {
                             }
                         }
                         Spacer()
+                        
                         VStack {
                             Image(systemName: "person.fill")
                                 .foregroundColor(.white)

@@ -121,6 +121,19 @@ struct HomeScreenView: View {
                                 .font(.caption)
                         }
                         Spacer()
+                            
+                            NavigationLink(destination: StatsChartView(warranties: warranties)) {
+                                VStack {
+                                    Image(systemName: "chart.bar.fill")
+                                        .foregroundColor(.white)
+                                        .font(.system(size: 24))
+                                    Text("Stats")
+                                        .foregroundColor(.white)
+                                        .font(.caption)
+                                }
+                            }
+                            
+                        Spacer()
                         NavigationLink(destination: ProfileScreenView()) {
                             VStack {
                                 Image(systemName: "person")
