@@ -24,8 +24,12 @@ struct EditWarrantyView: View {
     @State private var isShowingImagePicker = false
     @State private var isCameraSelected = false
     @State private var showSourceSelection = false
+    
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
-    let currencies = ["USD", "EUR"]
+
+    let currencies = ["RSD", "EUR"]
     let categories = ["Laptop", "Smartphone", "Smartwatch", "TV", "Headphones"]
     let borderRadius: CGFloat = 8
     let sideMargin: CGFloat = 24
@@ -88,7 +92,11 @@ struct EditWarrantyView: View {
                 .sheet(isPresented: $isShowingImagePicker) {
                     ImagePicker(selectedImage: $selectedImage)
                 }
-                .onAppear { loadWarrantyImage() }
+                //.onAppear { loadWarrantyImage() }
+                .task {
+                                    await loadWarrantyImage()
+                                }
+
 
                 Divider()
                     .background(Color.white.opacity(0.16))
@@ -179,9 +187,15 @@ struct EditWarrantyView: View {
         )
         .navigationTitle("Edit Warranty")
         .navigationBarTitleDisplayMode(.inline)
+        .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Invalid input"),
+                        message: Text(alertMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
     }
 
-    // MARK: - LOAD IMAGE
     private func loadWarrantyImage() {
         guard selectedImage == nil, let localPath = warranty.localImagePath else { return }
         let fileURL = getDocumentsDirectory().appendingPathComponent(localPath)
@@ -191,12 +205,14 @@ struct EditWarrantyView: View {
             selectedImage = image
         }
     }
+        
 
     private func updateWarranty() {
-        guard !name.isEmpty, !warrantyLength.isEmpty, !category.isEmpty, !cost.isEmpty else {
-            print("Please fill all fields")
-            return
-        }
+            guard !name.isEmpty, !warrantyLength.isEmpty, !category.isEmpty, !cost.isEmpty else {
+                alertMessage = "Please fill all fields"
+                showAlert = true
+                return
+            }
 
         let db = Firestore.firestore()
         let formatter = DateFormatter()

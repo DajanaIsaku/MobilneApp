@@ -34,8 +34,8 @@ struct CreateWarrantyView: View {
     let topGradientColor = Color(red: 162/255, green: 230/255, blue: 218/255)
     let bottomGradientColor = Color(red: 42/255, green: 43/255, blue: 43/255)
     
-    let currencies = ["USD", "EUR"]
-    let categories = ["Laptop", "Smartphone", "Smartwatch", "TV", "Headphones"]
+    let currencies = ["RSD", "EUR"]
+    let categories = ["Laptop", "Smartphone", "Smartwatch", "TV", "Headphones", "Other"]
     
     var body: some View {
         ScrollView {
@@ -219,7 +219,7 @@ struct CreateWarrantyView: View {
         }
         
         guard selectedImage != nil else {
-            alertMessage = "Please add a product image."
+            alertMessage = "Please add a picture of the receipt."
             return false
         }
         
