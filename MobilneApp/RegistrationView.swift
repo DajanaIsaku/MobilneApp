@@ -15,6 +15,8 @@ struct RegistrationView: View {
     @State private var isSecure = true
     @State private var showAlert = false
     @State private var alertMessage = ""
+    
+    @State private var navigateToContent = false
 
     var body: some View {
         ZStack {
@@ -124,8 +126,10 @@ struct RegistrationView: View {
                                 alertMessage = "Registration failed: \(error.localizedDescription)"
                                 showAlert = true
                             } else {
-                                alertMessage = "Account created successfully!"
-                                showAlert = true
+                                //alertMessage = "Account created successfully!"
+                                //showAlert = true
+                                navigateToContent = true
+
                             }
                         }
                     }
@@ -146,6 +150,9 @@ struct RegistrationView: View {
                         dismissButton: .default(Text("OK"))
                     )
                 }
+                NavigationLink(destination: ContentView(), isActive: $navigateToContent) {
+                                   EmptyView()
+                               }
 
                 HStack {
                     Text("Already have an account?")
